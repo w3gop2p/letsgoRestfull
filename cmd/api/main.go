@@ -9,6 +9,7 @@ import (
 	"github.com/w3gop2p/letsgoRestfull/internal/jsonlog"
 	"github.com/w3gop2p/letsgoRestfull/internal/mailer"
 	"os"
+	"strings"
 	"sync"
 	"time"
 )
@@ -36,6 +37,9 @@ type config struct {
 		password string
 		sender   string
 	}
+	cors struct {
+		trustedOrigins []string
+	}
 }
 
 type application struct {
@@ -49,7 +53,7 @@ type application struct {
 func main() {
 	var cfg config
 
-	flag.IntVar(&cfg.port, "port", 4000, "API server port")
+	flag.IntVar(&cfg.port, "port", 5000, "API server port")
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
 	flag.StringVar(&cfg.db.dsn, "db-dsn", "postgres://postgres:parola@localhost/greenlight?sslmode=disable", "PostgreSQL DSN")
 
@@ -66,6 +70,11 @@ func main() {
 	flag.StringVar(&cfg.smtp.username, "smtp-username", "c8056a3aaee1d0", "SMTP username")
 	flag.StringVar(&cfg.smtp.password, "smtp-password", "c2be5cf09193f9", "SMTP password")
 	flag.StringVar(&cfg.smtp.sender, "smtp-sender", "Greenlight <no-reply@greenlight.w3gop2p.net>", "SMTP sender")
+
+	flag.Func("cors-trusted-origins", "Trusted CORS origins (space separated)", func(val string) error {
+		cfg.cors.trustedOrigins = strings.Fields(val)
+		return nil
+	})
 
 	flag.Parse()
 
